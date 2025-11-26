@@ -1,12 +1,10 @@
-FROM nginx
+FROM openjdk:8-jdk-alpine
 
-WORKDIR /user/share/nginx/html/
-USER root
+WORKDIR /app
 
-COPY ./docker/nginx.conf /etc/nginx/conf.d/default.conf
-COPY ./dist /user/share/nginx/html/
+COPY ./user-center-backend-0.0.1-SNAPSHOT.jar ./app/application.jar
 
-EXPOSE 80
+EXPOSE 8080
 
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["java","-jar","./app/UserCenter-backend-0.0.1-SNAPSHOT.jar","--spring.profiles.active=prod"]
 
