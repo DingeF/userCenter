@@ -1,0 +1,18 @@
+# 线上环境配置
+
+## 应用服务 WEB 访问端口
+spring:
+  application:
+    name: user-center
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/yifan  #  /user_center?useSSL=false&serverTimezone=UTC&characterEncoding=utf-8
+    username: root
+    password: Dyf981024.
+  # 配置session超时时间为1天
+  session:
+    timeout: 86400
+
+
+
