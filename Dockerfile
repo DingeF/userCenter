@@ -1,5 +1,6 @@
 # Dockerfile（后端）
-FROM maven:3.9-openjdk-8 AS build
+FROM openjdk:8-jdk-alpine AS build
+RUN apk add --no-cache maven
 WORKDIR /src
 COPY pom.xml .
 COPY src ./src
