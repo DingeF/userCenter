@@ -1,4 +1,5 @@
 package com.yifan.usercenter.service.impl;
+
 import com.yifan.usercenter.common.*;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -48,19 +49,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         // 1.校验
         // 1.1 使用apache common utils库，进行非空校验以及长度校验
         if (StringUtils.isAnyBlank(userAccount, userPassword, checkPassword, plantCode)) {
-           throw new BusinessException(ErrorCode.PARAMS_ERROR, "传入参数有空值");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "传入参数有空值");
         }
         if (userAccount.length() < 4) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "注册账户长度不能小于4");
         }
         if (userPassword.length() < 8 || checkPassword.length() < 8) {
-           throw new BusinessException(ErrorCode.PARAMS_ERROR, "注册密码长度不能小于8");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "注册密码长度不能小于8");
         }
         if (!Objects.equals(userPassword, checkPassword)) {  // 不能使用 == 比较字符串，必须使用equals方法
-           throw new BusinessException(ErrorCode.PARAMS_ERROR, "注册密码与校验密码不一致");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "注册密码与校验密码不一致");
         }
         if (plantCode.length() > 5 || !StringUtils.isNumeric(plantCode)) {
-           throw new BusinessException(ErrorCode.PARAMS_ERROR, "注册星球用户编码长度不能大于5，且必须为数字");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "注册星球用户编码长度不能大于5，且必须为数字");
         }
         // 保证plantCode的唯一性
         QueryWrapper<User> queryWrapperCode = new QueryWrapper<>();
@@ -111,22 +112,22 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
      * @param userPassword 用户密码
      * @return 用户信息(脱敏)，JSON格式
      */
-     @Override
+    @Override
     public BaseResponse<User> userLogin(String userAccount, String userPassword, HttpServletRequest request) {
 
         //1. 校验
         // 1.1 传递的用户账户与用户密码不能为空
         if (StringUtils.isAnyBlank(userAccount, userPassword)) {
-          throw new BusinessException(ErrorCode.PARAMS_ERROR, "传入参数有空值");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "传入参数有空值");
         }
         // 1.2 用户账户不能包含特殊字符
         String validPattern = "[`~!@#$%^&*()+=|{}':;',\\[\\].<>/?~！@#￥%……&*（）——+|{}【】‘；：”“’。，、？]";
         if (StringUtils.containsAny(userAccount, validPattern.toCharArray())) {
-           throw new BusinessException(ErrorCode.PARAMS_ERROR, "登录账户包含特殊字符");  // 账户包含特殊字符
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "登录账户包含特殊字符");  // 账户包含特殊字符
         }
         // 1.3用户账户长度必须大于4
         if (userAccount.length() < 4) {
-           throw new BusinessException(ErrorCode.PARAMS_ERROR, "登录账户长度不能小于4");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "登录账户长度不能小于4");
         }
         // 1.4 用户密码长度必须大于8
         if (userPassword.length() < 8) {
@@ -148,22 +149,23 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "登录密码错误");
         }
 
-         // 4. 返回用户信息(Json格式，脱敏)
-         User safetyUser = getSafetyUser(user);
+        // 4. 返回用户信息(Json格式，脱敏)
+        User safetyUser = getSafetyUser(user);
 
-         // 5. 记录用户的登陆状态(将用户信息存储到session中)
-         request.getSession().setAttribute(UserConstant.USER_LOGIN_STATUS, safetyUser);
-         return ResultUtil.success(safetyUser, "登录成功");
+        // 5. 记录用户的登陆状态(将用户信息存储到session中)
+        request.getSession().setAttribute(UserConstant.USER_LOGIN_STATUS, safetyUser);
+        return ResultUtil.success(safetyUser, "登录成功");
     }
 
     /**
      * 用户注销
+     *
      * @param request 请求对象
      * @return 注销状态码
      */
     @Override
     public BaseResponse<Integer> userLogout(HttpServletRequest request) {
-         // 删除session中的用户登录状态
+        // 删除session中的用户登录状态
         request.getSession().removeAttribute(UserConstant.USER_LOGIN_STATUS);
         return ResultUtil.success(1, "注销成功");
     }
@@ -171,12 +173,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
     /**
      * 用户信息脱敏----防止用户信息泄露
+     *
      * @param user 用户对象
      * @return 脱敏后的用户信息
      */
     @Override
     public User getSafetyUser(User user) {
-        if(user == null){
+        if (user == null) {
             return null;
         }
 
@@ -196,6 +199,28 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         safetyUser.setCreateTime(user.getCreateTime());
 
         return safetyUser;
+    }
+
+    @Override
+    public User updateUser(User oldUser, User afterUpdateUser) {
+
+        // 根据afterUpdateUser更新oldUser的用户信息
+        oldUser.setUsername(afterUpdateUser.getUsername());
+        oldUser.setUserAccount(afterUpdateUser.getUserAccount());
+        oldUser.setAvatarUrl(afterUpdateUser.getAvatarUrl());
+        oldUser.setGender(afterUpdateUser.getGender());
+        oldUser.setUserPassword(afterUpdateUser.getUserPassword());
+        oldUser.setPhone(afterUpdateUser.getPhone());
+        oldUser.setEmail(afterUpdateUser.getEmail());
+        oldUser.setUserStatus(afterUpdateUser.getUserStatus());
+        oldUser.setUserRole(afterUpdateUser.getUserRole());
+        oldUser.setPlantCode(afterUpdateUser.getPlantCode());
+
+        // 更新用户信息
+        userMapper.updateById(oldUser);
+
+        // 返回更新后的用户信息
+        return oldUser;
     }
 
 }

@@ -158,6 +158,20 @@ public class UserController {
         return ResultUtil.success(userService.removeById(id), "删除成功");
     }
 
+    @PostMapping("/update")
+    public BaseResponse<User> updateUser(@RequestBody User user, HttpServletRequest request){
+        // 仅管理员可更新
+        if (!isAdmin(request)) {
+           throw new BusinessException(ErrorCode.NO_AUTH, "用户更新权限不足");
+        }
+        if (user == null || user.getId() == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户ID参数错误");
+        }
+        // 保留传入的user的Id不变，其余值都根据user的属性值进行更新
+        User oldUser = userService.getById(user.getId());
+        return ResultUtil.success(userService.updateUser(oldUser, user), "更新成功");
+    }
+
 
     /**
      * 获取当前用户登录态

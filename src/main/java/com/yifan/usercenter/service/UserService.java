@@ -50,6 +50,14 @@ public interface UserService extends IService<User> {
      */
     User getSafetyUser(User user);
 
+    /**
+     * 更新用户信息
+     * @param oldUser       原始用户对象
+     * @param afterUpdateUser HTTP请求传入的、待更新的用户对象
+     * @return AfterUpdateUser更新后的用户对象
+     */
+    User updateUser(User oldUser, User afterUpdateUser);
+
 
 
 
