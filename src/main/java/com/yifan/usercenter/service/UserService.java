@@ -58,6 +58,14 @@ public interface UserService extends IService<User> {
      */
     User updateUser(User oldUser, User afterUpdateUser);
 
+    /**
+     * 根据标签列表查询用户(所有标签都满足)
+     * @param tagNameList 标签列表
+     * @return 返回 safetyUser 列表
+     */
+    List<User> queryUsersByTagsAccordMemory(List<String> tagNameList);
+
+    List<User> queryUsersByTagsAccordSql(List<String> tagNameList);
 
 
 

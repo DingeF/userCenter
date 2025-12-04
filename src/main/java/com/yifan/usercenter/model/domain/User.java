@@ -70,6 +70,11 @@ public class User {
     private String plantCode;
 
     /**
+     * 标签列表 Json 格式
+     */
+    private String tags;
+
+    /**
      * 创建时间
      */
     private Date createTime;

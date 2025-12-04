@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -135,7 +136,13 @@ public class UserController {
         return ResultUtil.success(safe, "查询成功");
     }
 
-
+    @PostMapping("/queryByTags")
+    public BaseResponse<List<User>> queryUserByTags(@RequestBody List<String> tagNameList) {
+        if (Collections.emptyList().equals(tagNameList)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "标签列表为空");
+        }
+        return ResultUtil.success(userService.queryUsersByTagsAccordMemory(tagNameList), "查询成功");
+    }
 
 
     /**

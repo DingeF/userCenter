@@ -16,6 +16,7 @@
             <result property="userStatus" column="userStatus" />
             <result property="userRole" column="userRole" />
             <result property="plantCode" column="plantCode" />
+            <result property="tags" column="tags" />
             <result property="createTime" column="createTime" />
             <result property="updateTime" column="updateTime" />
             <result property="isDelete" column="isDelete" />
@@ -24,7 +25,7 @@
     <sql id="Base_Column_List">
             <!-- SQL fields for User table -->
         id,username,userAccount,avatarUrl,gender,userPassword,
-        phone,email,userStatus,userRole,plantCode,createTime,updateTime,
+        phone,email,userStatus,userRole,plantCode,tags,createTime,updateTime,
         isDelete
     </sql>
 </mapper>

@@ -1,5 +1,8 @@
 package com.yifan.usercenter.service.impl;
 
+import com.google.gson.Gson;
+import com.google.gson.TypeAdapter;
+import com.google.gson.reflect.TypeToken;
 import com.yifan.usercenter.common.*;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -17,7 +20,8 @@ import org.springframework.util.DigestUtils;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 用户操作实现类
@@ -196,6 +200,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         safetyUser.setUserStatus(user.getUserStatus());
         safetyUser.setUserRole(user.getUserRole());
         safetyUser.setPlantCode(user.getPlantCode());
+        safetyUser.setTags(user.getTags());
         safetyUser.setCreateTime(user.getCreateTime());
 
         return safetyUser;
@@ -223,7 +228,78 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         return oldUser;
     }
 
+
+    /**
+     * 根据标签列表查询用户(所有标签都满足)----内存查询
+     * @param tagNameList 标签列表
+     * @return 返回 safetyUser 列表
+     */
+    @Override
+    public List<User> queryUsersByTagsAccordMemory(List<String> tagNameList) {
+        if (Collections.emptyList().equals(tagNameList)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "标签列表为空");
+        }
+
+        // 使用内存查询用户标签，拼接and查询条件
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        List<User> userList = userMapper.selectList(queryWrapper);
+
+        // 过滤用户标签，返回包含所有查询标签的用户
+       return userList.stream().filter(user -> {
+            Gson gson = new Gson();
+            String tagString = user.getTags();
+
+            // 空tagString字符串处理
+            if (StringUtils.isBlank(tagString)){
+                return false;
+            }
+
+            // 标签列表,使用Gson将Json字符串转Json列表(反序列化为List<String>的Java对象)
+            List<String> tagNames = gson.fromJson(tagString, new TypeToken<List<String>>() {
+            }.getType());
+            // 检查用户标签是否包含所有查询标签，不区分大小写
+           for (String tagName : tagNames) {
+               boolean matchFound = false;
+               for (String queryTag : tagNameList) {
+                   if (tagName.equalsIgnoreCase(queryTag)) {
+                       matchFound = true;
+                       break;
+                   }
+               }
+               if (!matchFound) {
+                   return false;
+               }
+           }
+            return true;
+        }).map(this::getSafetyUser).collect(Collectors.toList());
+    }
+
+    /**
+     * 根据标签列表查询用户(所有标签都满足)----SQL查询
+     * @param tagNameList 标签列表
+     * @return 返回 safetyUser 列表
+     */
+    @Override
+    public List<User> queryUsersByTagsAccordSql(List<String> tagNameList){
+        if (Collections.emptyList().equals(tagNameList)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "标签列表为空");
+        }
+        // 定义查询对象
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        // 使用SQL查询用户标签，拼接and查询条件
+        // like %Java% and like %Python% and like %男% and like %研一%
+        // 使用循环拼接like查询条件
+        for(String tagName : tagNameList){
+            queryWrapper = queryWrapper.like("tags", tagName); // 列名:值
+        }
+        // 执行查询
+        List<User> userList = userMapper.selectList(queryWrapper);
+
+        // 返回safetyUser
+        return userList.stream().map(this::getSafetyUser).collect(Collectors.toList());
+    }
 }
+
 
 
 

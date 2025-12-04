@@ -1,5 +1,7 @@
 package com.yifan.usercenter.service;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 import com.yifan.usercenter.common.BaseResponse;
 import com.yifan.usercenter.model.domain.User;
@@ -79,5 +81,19 @@ class UserServiceTest {
         checkPassword = "12345678910";
         result = userService.userRegister(userAccount, userPassword, checkPassword, plantCode);
         Assertions.assertTrue(result.getData() != null && result.getData() > 0);
+    }
+
+    @Test
+     void queryUsersByTagsAccordSql(){
+        List<String> tagNameList = Arrays.asList("java", "python");
+        List<User> userList = userService.queryUsersByTagsAccordSql(tagNameList);
+        Assertions.assertTrue(userList != null && userList.size() > 0);
+    }
+
+    @Test
+     void queryUsersByTagsAccordMemory(){
+        List<String> tagNameList = Arrays.asList("java", "python");
+        List<User> userList = userService.queryUsersByTagsAccordMemory(tagNameList);
+        Assertions.assertTrue(userList != null && userList.size() > 0);
     }
 }
